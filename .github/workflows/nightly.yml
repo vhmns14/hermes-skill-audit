@@ -1,0 +1,48 @@
+name: Nightly Audit
+
+on:
+  schedule:
+    - cron: "42 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: Run audit + record run
+        run: |
+          python audit.py examples/ --no-fail --json data/last-audit.json
+          python - <<'PY'
+          import json, datetime, os
+          try:
+              findings = json.load(open("data/last-audit.json"))["count"]
+          except Exception:
+              findings = -1
+          stamp = {
+              "ran_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              "findings": findings,
+          }
+          os.makedirs("data", exist_ok=True)
+          with open("data/last-run.json", "w") as f:
+              json.dump(stamp, f, indent=2)
+              f.write("\n")
+          print("nightly run recorded:", stamp)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet data/; then
+            git add data/
+            git commit -m "chore: nightly audit run"
+            git push
+          else
+            echo "No changes"
+          fi

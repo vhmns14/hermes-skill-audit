@@ -1,0 +1,46 @@
+{
+  "rules": [
+    {
+      "id": "destructive-rm",
+      "severity": "high",
+      "description": "Destructive recursive delete",
+      "pattern": "rm\\s+-[rf]+\\s"
+    },
+    {
+      "id": "piped-shell",
+      "severity": "high",
+      "description": "Piping a download straight into a shell",
+      "pattern": "(curl|wget)[^\\n]*(|\\||\\||&)[^\\n]*(sh|bash|sudo)"
+    },
+    {
+      "id": "privilege",
+      "severity": "medium",
+      "description": "Privilege escalation / overly open permissions",
+      "pattern": "(sudo\\s|su\\s+-|chmod\\s+777)"
+    },
+    {
+      "id": "obfuscation",
+      "severity": "high",
+      "description": "Obfuscated / dynamic execution",
+      "pattern": "(base64\\s+-d|eval\\s+[`$(]|python[0-9]*\\s+-c\\s+[\"'].*exec)"
+    },
+    {
+      "id": "outbound-post",
+      "severity": "medium",
+      "description": "Possible data exfiltration (outbound POST)",
+      "pattern": "(curl\\s+-X\\s+POST|wget\\s+--post)"
+    },
+    {
+      "id": "writes-system",
+      "severity": "medium",
+      "description": "Writes outside the agent workspace",
+      "pattern": "(>/?(etc|usr|System)|~/\\.|/var/)"
+    },
+    {
+      "id": "prompt-injection",
+      "severity": "high",
+      "description": "Prompt-injection style instruction in skill text",
+      "pattern": "(ignore (previous|all|prior) instructions|disregard (the )?(above|previous)|you are now|reveal your (system )?prompt|system prompt:)"
+    }
+  ]
+}
